@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1518151495 source:/home/valotam/Source/PARALLEL/Parallel_For_Loop/ompFor.cpp
+	<iostream>
+	<chrono>
+	<ctime>
+	<math.h>
+	<omp.h>
+
+1518149417 source:/home/valotam/Source/PARALLEL/Parallel_For_Loop/ompHello.cpp
+	<iostream>
+	<time.h>
+	<omp.h>
+
