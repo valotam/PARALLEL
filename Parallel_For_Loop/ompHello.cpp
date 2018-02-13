@@ -17,6 +17,7 @@ int main() {
     }
 #endif // WORK_IN_PARALLEL
 
+
     return 0;
 }
 
