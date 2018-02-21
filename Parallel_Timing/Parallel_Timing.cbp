@@ -32,8 +32,8 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-std=c++1z" />
-			<Add option="-std=c11" />
+			<Add option="-std=c++11" />
+			<Add option="-fopenmp" />
 			<Add directory="../ext" />
 			<Add directory="../ext/eigen" />
 			<Add directory="../ext/glfw/include" />

@@ -4,7 +4,8 @@
 #include <thread>
 #include <iostream>
 
-void createThreads();
+void createThreadsVerJoin();
+void createThreadsNonJoin();
 
 
 #endif // CREATE_THREADS_H_INCLUDED

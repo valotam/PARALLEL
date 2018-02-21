@@ -9,13 +9,17 @@
 
 int main(){
     GUI gui = GUI();
-    gui.AddButton("Serial", [] {
-        std::cout << "pushed button" << std::endl;
-        computPI();
+
+    gui.AddButton("Create threads ver. random", [] {
+        createThreadsNonJoin();
         });
-    gui.AddButton("Parallel", [] {
-        std::cout << "pushed button" << std::endl;
-        createThreads();
+
+    gui.AddButton("Create threads ver. join", [] {
+        createThreadsVerJoin();
+        });
+
+    gui.AddButton("Compare the performance of serial and parallel programs", [] {
+        computPI();
         });
 
     gui.PerformLoop();

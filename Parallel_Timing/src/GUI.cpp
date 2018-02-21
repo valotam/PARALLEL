@@ -24,7 +24,7 @@ GUI::GUI()
     gui = new FormHelper(screen);
     window = gui->addWindow(Eigen::Vector2i(10, 10), "Comput PI");
 
-    window->center();
+    //window->center();
 }
 
 GUI::~GUI()

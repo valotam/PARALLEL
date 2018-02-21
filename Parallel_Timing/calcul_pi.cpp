@@ -42,7 +42,7 @@ int computPI ()
   int r8_logn_max = 10;
 
   cout << "\n";
-  cout << "COMPUTE_PI\n";
+  cout << "============COMPUTE_PI============\n";
   cout << "  C++/OpenMP version\n";
   cout << "\n";
   cout << "  Estimate the value of PI by summing a series.\n";
@@ -287,15 +287,14 @@ double r8_pi_est_omp ( int n )
 # pragma omp parallel \
   shared ( h, n ) \
   private ( i, x )
-
+{
 # pragma omp for reduction ( + : sum2 )
-
   for ( i = 1; i <= n; i++ )
   {
     x = h * ( double ) ( 2 * i - 1 );
     sum2 = sum2 + 1.0 / ( 1.0 + x * x );
   }
-
+}
   estimate = 4.0 * sum2 / ( double ) ( n );
 
   return estimate;
