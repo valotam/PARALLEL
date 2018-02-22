@@ -2,7 +2,12 @@
 title: "Parallel Programming"
 output: pdf_document
 mainfont: D2Coding
+toc:
+  depth_from: 1
+  depth_to: 6
+  ordered: false
 ---
+
 
 # 병렬 하드웨어와 소프트웨어
 
@@ -50,7 +55,7 @@ sequenceDiagram
 ```wavedrom
 {signal: [
   {name:'Time slice',  wave: 'p......' },
-  {name:'Process',     wave: 'x=.345x', data: 'a b c' },
+  {name:'Process',     wave: 'x=.345x', data: 'work1 work2 work3 work4' },
   {name:'Thread1',     wave: '01.0.10' },
   {name:'Thread2',     wave: '0.1110.' }
 ],
@@ -86,7 +91,7 @@ CPU와 가까운 순서대로
 
 예를 들어, for loop 를 실행한다고 할 때,
 
-```cpp
+```cpp {.line-numbers}
 for (size_t i = 0; i < n; i++) {
     x[i] += y[i];
 }
@@ -112,7 +117,7 @@ SIMD 시스템이 n 개의 ALU를 갖고 있다고 가정한다면, 동시에 n�
 
 > 거짓 공유
 
-```cpp
+```cpp {.line-numbers}
 // thread 1
 int a[1000];     
 int b[1000];     
@@ -121,7 +126,8 @@ while( true ) {
      a[ 998 ] = i * 1000;
 }
 ```
-```cpp
+
+```cpp {.line-numbers}
 // thread 2
 int a[1000];     
 int b[1000];     
@@ -159,7 +165,7 @@ while( true ) {
 
 Task and Data parallel
 
-```cpp
+```cpp {.line-numbers}
 /*Task parallel*/
 
 if (//tread or process #0)
@@ -168,7 +174,7 @@ else
   /*do that*/;
 ```
 
-```cpp
+```cpp {.line-numbers}
 /*Data parallel*/
 
 if (//tread or process #0)
@@ -200,25 +206,25 @@ MIMD 시스템에서 프로세서는 비동기로 실행하며 그것은 nondete
 
 예를 들어, 스레드 0 에는 my_x =7을, 스레드 1 에는 my_x = 19를 갖고 있다고 가정해 보자. 이때 각각의 my_x를 출력한다고 할 때,
 
-```cpp
+```cpp {.line-numbers}
 printf("Thread &d > my_val = &d\n", my_rank, my_x);
 ```
 
 문장을 완료하는 상대적인 비율이 실행마다 달라서, 출력이 아래 둘 중 어느 것으로 나올 지 알 수 없다.
 
-```cpp
+```cpp {.line-numbers}
 Thread 0 > my_val = 7
 Thread 1 > my_val = 19
 ```
 
-```cpp
+```cpp {.line-numbers}
 Thread 0 > my_val = 19
 Thread 1 > my_val = 7
 ```
 
 이러한 문제(비결정론)가 공유 메모리 프로그램의 경우는 큰 문제가 되는 경우가 있다. 여기 두 개의 스레드를 사용한 간단한 예제가 있다. 각 스레드는 int를 계산하며 그것은 프라이빗 변수 my_val에 저장된다. 또한, my_val에 저장된 값을 덧셈하여 초기값이 0으로 설정된 공유 메모리 위치 x에 덧셈한다고 가정하자. 두 개의 스레드는 다음과 같은 코드를 실행하게 된다.
 
-```cpp
+```cpp {.line-numbers}
 my_val = Compute_val(my_rank);
 x += my_val;
 ```
@@ -238,7 +244,7 @@ Time  | Core 0  | Core 1
 
 상호 배제를 보장하기 위해 사용하는 가장 공통적인 방법은 **mutual exclusion lock**, **mutex**, or **lock** 이다.  기본 아이디어는 각 크리티컬 섹션은 락에 의해 보호된다는 것이다. 스레드가 크리티컬 섹션에 있는 코드를 실행하기 전에 뮤텍스 함수를 호출하여 뮤텍스를 "획득"해야 한다. 크리티컬 섹션의 코드 실행이 완료되면, unlock 함수를 호출하여 뮤텍스를 "포기"한다. 다른 스레드가 락을 "소유"한다면 이것은 락 함수에 대한 호출로부터의 리턴이지만, 언락 함수를 아직 호출하지는 않은 것이다. 크리티컬 섹션에 있는 코드를 실행하려고 하는 다른 스레드는 락 함수를 호출하기까지 대기한다.  이렇게 코드 함수가 정상적으로 동작하는 것을 보장하기 위해 다음과 같이 코드를 수정한다.
 
-```cpp
+```cpp {.line-numbers}
 my_val = Compute_val(my_rank);
 Lock(&add_my_val_lock);
 x += my_val;
@@ -251,7 +257,7 @@ Unlock(&add_my_val_lock);
 
 뮤텍스에 대한 대안으로는, **busy-waiting** 이다. 비지-웨이팅에서 스레드가 루프에 들어가는 유일한 목적은 컨디션을 테스트하는 것이다. 예제에서 공유 변수 ok_for_1 이 거짓으로 초기화됐다고 가정하자. 다음의 코드와 같은 경우는 스레드 0이 x를 없데이트한 후까지 스레드 1은 x를 업데이트하지 않는다는 것을 보장한다.
 
-```cpp
+```cpp {.line-numbers}
 my_val = Compute_val(my_rank);
 if (my_rank == 1) {
   while (!ok_for_1);  /*busy-wait loop*/
@@ -272,7 +278,7 @@ if (my_rank == 0) {
 
 분산 메모리 시스템에서 가장 많이 사용되는 API는 message-passing 이다.  메시지 패싱 API는 send 와 receive 함수를 제공한다. 아래 pseudo-code를 확인하면,
 
-```cpp
+```cpp {.line-numbers}
 char message[100];
 
 my_rank = Get_rank();
@@ -312,14 +318,14 @@ $p$  | 1  | 2  | 4  | 8  |  16
 $S$  | 1.0  | 1.9  |  3.6 |  6.5 |  10.8
 $E = S/p$  | 1.0  | 0.95  | 0.90  |  0.81 |  0.68
 
-Data Size  | $p$  | 1  | 2  | 4  | 8  | 16
---|---|---|---|---|---|--
-x0.5  | $S$  | 1.0  | 1.9  | 3.1  | 4.8  | 6.2
-  .  | $E$  | 1.0  | 0.95  | 0.78  | 0.60  | 0.39
-x1  | $S$  | 1.0  | 1.9  | 3.6  | 6.5  | 10.8
-  .  | $E$  | 1.0  | 0.95  | 0.90  | 0.81  | 0.68
-x2  | $S$  | 1.0  | 1.9  | 3.9  | 7.5  | 14.2
-  .  | $E$  | 1.0  | 0.95  | 0.98  | 0.94  | 0.89
+| Data Size  | $p$  | 1  | 2  | 4  | 8  | 16 |
+|---|---|---|---|---|---|---|
+| x0.5 | $S$ | 1.0  | 1.9  | 3.1  | 4.8  | 6.2 |
+|  ^  | $E$  | 1.0  | 0.95  | 0.78  | 0.60  | 0.39 |
+| x1  | $S$  | 1.0  | 1.9  | 3.6  | 6.5  | 10.8 |
+|  ^  | $E$  | 1.0  | 0.95  | 0.90  | 0.81  | 0.68 |
+| x2  | $S$  | 1.0  | 1.9  | 3.9  | 7.5  | 14.2 |
+|  ^  | $E$  | 1.0  | 0.95  | 0.98  | 0.94  | 0.89 |
 
 위 식에 "병렬 오버헤드"를 추가하면,
 
@@ -383,7 +389,7 @@ $$
 
 수행 시간 측정에서 일반적으로는 프로그램의 시작과 끝 사이에 걸리는 동작 시간에 대해서는 관심이 없다. 보통은 프로그램의 일부분(함수 등)에 대해서만 관심이 있다. 또한, "CPU 시간"에는 프로그램이 실행한 명령의 전체 시간(시간을 재기 위해 사용한 코드, 라이브러리 함수가 사용하는 시간, 함수 호출로 운영체제가 소비하는 시간 등)이기 때문에 관심이 없다. 대신에 "wall clock"을 통해 병렬 프로그램의 수행 시간에 대한 리포팅을 한다.
 
-```cpp
+```cpp {.line-numbers}
 double start, finish;
 
 start = Get_current_time();

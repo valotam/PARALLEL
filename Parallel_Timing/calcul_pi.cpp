@@ -116,11 +116,13 @@ void r8_test ( int logn_max )
   cout << "\n";
   cout << "  TIME = elapsed wall clock time;\n";
   cout << "\n";
+  cout << "  S = The rate of speed-up;\n";
+  cout << "\n";
   cout << "  Note that you can''t increase N forever, because:\n";
   cout << "  A) ROUNDOFF starts to be a problem, and\n";
   cout << "  B) maximum integer size is a problem.\n";
   cout << "\n";
-  cout << "             N Mode    Estimate        Error           Time\n";
+  cout << "             N Mode    Estimate        Error           Time             S\n";
   cout << "\n";
 
   n = 1;
@@ -145,11 +147,14 @@ void r8_test ( int logn_max )
 
     error = r8_abs ( estimate - r8_pi );
 
+    double speedup = wtime;
+
     cout << "  " << setw(14) << n
          << "  " << setw(3)  << mode
          << "  " << setw(14) << estimate
          << "  " << setw(14) << error
          << "  " << setw(14) << wtime << "\n";
+
 //
 //  Open MP enabled calculation.
 //
@@ -163,11 +168,14 @@ void r8_test ( int logn_max )
 
     error = r8_abs ( estimate - r8_pi );
 
+    speedup = speedup / wtime;
+
     cout << "  " << setw(14) << n
          << "  " << setw(3)  << mode
          << "  " << setw(14) << estimate
          << "  " << setw(14) << error
-         << "  " << setw(14) << wtime << "\n";
+         << "  " << setw(14) << wtime
+         << "  " << setw(14) << speedup << "\n";
 
     n = n * 10;
   }
