@@ -366,3 +366,265 @@ int MPI_Bcast(
 ```
 
 랭크 source_proc을 갖고 있는 프로세스는 커뮤티케이터 comm에 있는 모든 프로세스에게 data_p에 의해 참조되는 메모리의 내용을 전송한다.
+
+> broadcast 응용
+
+```c {.line-numbers}
+void Get_input(
+      int       my_rank   /* in   */,
+      int       comm_sz   /* in   */,
+      double*   a_p       /* out  */,
+      double*   b_p       /* out  */,
+      int*      n_p       /* out  */) {
+  if (my_rank == 0) {
+    printf("Enter a, b, and n\n");
+    scanf("%lf %lf %d", a_p, b_p, n_p);
+  }
+  MPI_Bcast(a_p, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(b_p, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(n_p, 1, MPI_INT, 0, MPI_COMM_WORLD);
+} /* Get_input */
+```
+
+### 데이터 분산
+
+벡터의 합계를 구하는 함수를 작성한다고 가정해 보자.
+
+$$
+\begin{align}
+\mathbf{x} + \mathbf{y} &= (x_0, x_1, ... , x_{n-1}) + (y_0, y_1, ... , y_{n-1}) \\
+  &= (x_0 + y_0, x_1 + y_1, ... , x_{n-1} + y_{n-1}) \\
+  &= (z_0, z_1, ... , z_{n-1}) \\
+  &= \mathbf{z}
+\end{align}
+$$
+
+serial code
+
+```c {.line-numbers}
+void Vector_sum(double x[], double y[], double z[], int n) {
+  int i;
+
+  for (i = 0; i < n; i++) {
+    z[i] = x[i] + y[i];
+  }
+} /* Vector_sum */
+```
+
+MPI code
+
+```c {.line-numbers}
+void Parallel_vector_sum(
+      double  local_x[]   /* in  */,
+      double  local_y[]   /* in  */,
+      double  local_z[]   /* out */,
+      int     local_n     /* in  */) {
+  int local_i;
+
+  for (local_i = 0; local_i < local_n; local_i++) {
+    local_z[local_i] = local_x[local_i] + local_y[local_i];
+  }
+} /* Parallel_vector_sum */
+```
+
+$ \textit{local_n} = \frac{ \textit{n}}{ \textit{comm_sz} } $ 각 프로세스에 자료를 할당하는 방식이 세 가지 존재한다.
+
+![block and cyclic](https://i.stack.imgur.com/dbM1i.gif)
+
+![block-cycle partitioning](http://slideplayer.com/4914294/16/images/51/Example%3A+Block-Cyclic+Distributions.jpg)
+
+### Scatter
+
+벡터 x와 y를 읽어 온다. 프로세스 0은 사용자로부터 입력을 받고 값을 읽어 온다. 그러고 나서 그 값을 다른 프로세스에게 브로드캐스트한다. 그러나 이러한 작업은 너무 낭비이다. 10개의 프로세스가 있고 벡터가 10,000개의 컴포넌트를 갖고 있다면 각 프로세스는 10,000개의 컴포넌트를 갖는 벡터를 위한 공간을 할당해야 한다. 만약 우리가 원하는 작업이 단지 100개의 컴포넌트만 갖는 서브 벡터의 오퍼레이션을 원한다면 더욱 낭비이다.
+
+따라서 프로세스 0에서 전체 벡터를 읽어 오는 함수를 작성하고 필요한 컴포넌트만큼만 다른 프로세스에게 전송한다. 통신을 위해 MPI는 다음과 같은 함수를 제공한다.
+
+```c {.line-numbers}
+int MPI_Scatter(
+  void*         send_buf_p    /* in  */,
+  int           send_count    /* in  */,
+  MPI_Datatype  send_type     /* in  */,
+  void*         recv_buf_p    /* out */,
+  int           recv_count    /* in  */,
+  MPI_Datatype  recv_type     /* in  */,
+  int           source_proc   /* in  */,
+  MPI_Comm      comm          /* in  */);
+```
+
+커뮤니케이터 comm은 comm_sz 만큼의 프로세스를 포함하고 있다면, MPI_Scatter는 send_buf_p에 의해 참조되는 데이터를 comm_sz만큼으로 분할한다. (아래 예시)
+
+```c {.line-numbers}
+void Read_vector(
+        double    local_a[]     /* out */,
+        int       local_n       /* in  */,
+        int       n             /* in  */,
+        char      vec_name[]    /* in  */,
+        int       my_rank       /* in  */,
+        MPI_Comm  comm          /* in  */) {
+
+  double* a = NULL;
+  int i;
+
+  if (my_rank == 0) {
+    a = malloc(n * sizeof(double));
+    printf("Enter the vector &s\n", vec_name);
+    for (i = 0; i < n; i++) {
+      scanf("%lf\n", &a[i]);
+    }
+    MPI_Scatter(a, local_n, MPI_DOUBLE, local_a, local_n, MPI_DOUBLE, 0, comm);
+    free(a);
+  } else {
+    MPI_Scatter(a, local_n, MPI_DOUBLE, local_a, local_n, MPI_DOUBLE, 0, comm);
+  }
+} /* Read_vector */
+```
+
+### Gather
+
+분산된 벡터를 모아야하는 경우,
+
+```c {.line-numbers}
+int MPI_Gather(
+  void*         send_buf_p    /* in  */,
+  int           send_count    /* in  */,
+  MPI_Datatype  send_type     /* in  */,
+  void*         recv_buf_p    /* out */,
+  int           recv_count    /* in  */,
+  MPI_Datatype  recv_type     /* in  */,
+  int           dest_proc     /* in  */,
+  MPI_Comm      comm          /* in  */);
+```
+
+```c {.line-numbers}
+void Print_vector(
+        double    local_b[]     /* in  */,
+        int       local_n       /* in  */,
+        int       n             /* in  */,
+        char      title[]       /* in  */,
+        int       my_rank       /* in  */,
+        MPI_Comm  comm          /* in  */) {
+
+  double* b = NULL;
+  int i;
+
+  if (my_rank == 0) {
+    b = malloc(n * sizeof(double));
+    MPI_Gather(local_b, local_n, MPI_DOUBLE, b, local_n, MPI_DOUBLE, 0, comm);
+    printf("%s\n", title);
+    for (i = 0; i < n; i++) {
+      printf("%f ", b[i]);
+    }
+    printf("\n");
+    free(b);
+  } else {
+    MPI_Gather(local_b, local_n, MPI_DOUBLE, b, local_n, MPI_DOUBLE, 0, comm);
+  }
+} /* Print_vector */
+```
+
+### Allgather
+
+MPI_Gather의 사용 제약은 MPI_Scatter의 사용 제약과 비슷하다. 출력 함수는 각 블록이 같은 크기를 갖는 블록 분산을 사용하는 벡터에서만 올바르게 동작한다.
+
+마지막 예제로 벡터를 사용하여 여러 매트릭스를 곱셈하는 MPI 함수를 어떻게 작성하는지 알아보자. (참고로 C 개발자는 종종 일차원 배열을 사용하여 이차원 배열처럼 "시뮬레이트"해서 사용한다. `A[i][j] --> A[i*n+j]`)
+
+개별적인 태스크는 $\mathbf{x}$ 컴포넌트에 의한 $A$의 항목의 곱셈과 $\mathbf{y}$ 컴포넌트 항목의 덧셈이다. 문장의 각각의 실행은 하나의 태스크다.
+
+```c
+y[i] += A[i*n+j]*x[j];
+```
+
+따라서, y[i]가 프로세스 q에 할당되면 A의 i번째 열을 프로세스 q에 할당하기가 편리하다. 이것은 A를 row 로 파티션하는 것을 제안한다. 블록 분산, 사이클릭 분산 혹은 블록 사이클릭 분산을 사용하여 행을 파티션할수 있다. MPI에서는 블록 파티션을 하는 것이 가장 쉽기 때문에 A의 행에 대한 블록 분산을 사용한다. 보통의 경우에는 comm_sz는 행의 갯수인 m으로 나뉜다고 가정한다.
+
+행으로 A를 분산하여 y[i]의 연산은 A의 항목에 필요한 모든 연산이 되며, 따라서 블록에 의해 y를 분산해야 한다. A의 i번째 행이 프로세스 q에 할당되면, y의 i번째 컴포넌트도 프로세스 q에 할당된다.
+
+이제 y[i]의 연산은 A의 i번째 열에 대한 모든 항목과 y의 모든 컴포넌트를 포함하고 있다. 따라서 x를 각 프로세스에 할당해서 통신의 양을 최소화할 수 있다.
+
+> 위 설명은 y[0]을 구하기 위해서 x[0]부터 x[n]까지의 모든 컴포넌트 값이 필요하다는 말이고, 이는 프로세스 q가 x의 모든 컴포넌트를 액세스 가능해야 한다는 뜻이다. 이를 가능하게 하는 것은 이미 배운 컬렉티브 통신을 사용하면 MPI_Bcast 호출을 사용하여 MPI_Gather 호출을 실행할 수 있다. 아마도 두 개의 트리 구조 통신을 포함하며 버터플라이를 사용하는 것이다. 또는,
+
+MPI는 다음과 같이 함수를 정의한다.
+
+```c {.line-numbers}
+int MPI_Allgather(
+  void*         send_buf_p    /* in  */,
+  int           send_count    /* in  */,
+  MPI_Datatype  send_type     /* in  */,
+  void*         recv_buf_p    /* out */,
+  int           recv_count    /* in  */,
+  MPI_Datatype  recv_type     /* in  */,
+  MPI_Comm      comm          /* in  */);
+```
+
+이 함수는 각 프로세스의 send_buf_p의 내용과 각 프로세스의 recv_buf_p에 이 내용을 저장하는 데에 초점을 맞추고 있다. 일반적으로 recv_buf_p는 각 프로세스로부터 받은 데이터의 양이며 따라서 대부분의 경우 recv_count는 send_count와 같다.
+
+이제 병렬 매트릭스-벡터 곱셈 함수를 구현해 보자. 이 함수가 여러번 호출되면 함수를 호출할 때 x를 한 번만 할당하고 할당한 x를 추가적인 인수로 넘길 수 있기 때문에 성능을 향상시킬 수 있다.
+
+```c {.line-numbers}
+void Mat_vect_mult(
+        double      local_A[]   /* in   */,
+        double      local_x[]   /* in   */,
+        double      local_y[]   /* out  */,
+        int         local_m     /* in   */,
+        int         n           /* in   */,
+        int         local_n     /* in   */,
+        MPI_Comm    comm        /* in   */) {
+
+  double* x;
+  int local_i, j;
+  int local_ok = 1;
+
+  x = malloc(n*sizeof(double));
+  MPI_Allgather(local_x, local_n, MPI_DOUBLE, x, local_n, MPI_DOUBLE, comm);
+
+  for (local_i = 0; local_i < local_m; local_i++) {
+    local_y[local_i] = 0.0;
+    for (j = 0; j < n; j++) {
+      local_y[local_i] += local_A[local_i*n + j]*x[j];
+    }
+  }
+  free(x);
+} /* Mat_vect_mult */
+```
+
+
+## MPI 파생 데이터 타입
+
+모든 분산 메모리 시스템에서 통신은 로컬 연산보다 훨씬 비용이 많이 든다. 예를 들어, 한 노드에서 다른 노드로 double형을 전송하는 것은 노드의 로컬 메모리에 저장되어 있는 두 개의 double형을 덧셈하는 것보다 더 시간이 많이 걸린다. 또한 다중 메시지에서 고정된 양의 데이터를 전송하는 데 드는 비용은 일반적으로 같은 양의 데이터를 갖는 하나의 메시지를 전송하는 비용보다 훨씬 크다. 예를 들어, 하나의 send/receive의 쌍보다 다음의 for loop가 훨씬 느릴 것으로 예상된다.
+
+MPI는 다중 메시지를 지원하지 않으면 데이터를 하나로 합쳐서 전송하기 위해 세 가지 기본적인 방법을 제공한다. 다양한 통신 함수에 count 인수, 파생된 datatype 그리고 MPI_Pack/Unpack이다. count 인수에 대해서는 이미 살펴봤고 연속된 배열의 항목을 하나의 메시지로 그룹핑할 수도 있다.
+
+MPI에서 derived datatype은 메모리에 아이템의 타입과 상대적인 위치를 저장하여 메모리에 있는 데이터 아이템의 컬렉션을 표현하는 데 사용된다. 여기서 아이디어는 데이터를 전송하는 함수가 데이터 아이템 집합에 대한 메모리에 저장되어 있는 타입과 상대적인 위치를 알고 있다면, 전송하기 전에 메모리로부터 아이템을 모을 수 있다. 이전 예제에서처럼 사다리꼴 규칙 프로그램에서 MPI_Bcast를 세 번 호출해야 한다.(a, b, n) 반대로 두 개의 double형과 하나의 int형으로 구성된 하나의 파생된 datatype을 만들 수 있다. 이렇게 하면 MPI_Bcast의 호출이 한 번만 필요하다.
+
+```c {.line-numbers}
+int MPI_Type_create_struct(
+  int           count                     /* in  */,
+  int           array_of_blocklengths[]   /* in  */,
+  MPI_Aint      array_of_displacements[]  /* in  */,
+  MPI_Datatype  array_of_types[]          /* in  */,
+  MPI_Datatype* new_type_p                /* out */);
+```
+
+인수 count는 datatype에 있는 항목의 수이다. 따라서 예제에서는 3이 된다.
+
+
+```c
+void Build_mpi_type(
+      double*       a_p             /* in  */,
+      double*       b_p             /* in  */,
+      int*          n_p             /* in  */,
+      MPI_Datatype* input_mpi_t_p   /* out */) {
+
+  int array_of_blocklengths[3] = {1, 1, 1};
+  MPI_Datatype array_of_types[3] = {MPI_DOUBLE, MPI_DOUBLE, MPI_INT};
+  MPI_Aint a_addr, b_addr, n_addr;
+  MPI_Aint array_of_displacements[3] = {0};
+
+  MPI_Get_address(a_p, &a_addr);
+  MPI_Get_address(b_p, &b_addr);
+  MPI_Get_address(n_p, &n_addr);
+  array_of_displacements[1] = b_addr - a_addr;
+  array_of_displacements[2] = n_addr - a_addr;
+  MPI_Type_create_struct(3, array_of_blocklengths, array_of_displacements, array_of_types, input_mpi_t_p);
+  MPI_Type_commit(input_mpi_t_p);  
+} /* Build_mpi_type */
+```
