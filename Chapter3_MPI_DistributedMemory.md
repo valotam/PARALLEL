@@ -4,7 +4,7 @@
 
 ## Hello, world!
 
-```cpp {.line-numbers}
+```c {.line-numbers}
 #include <stdio.h>
 #include <string.h>
 #include <mpi.h>
@@ -606,6 +606,7 @@ int MPI_Type_create_struct(
 
 인수 count는 datatype에 있는 항목의 수이다. 따라서 예제에서는 3이 된다.
 
+## Need to be added
 
 ```c
 void Build_mpi_type(
@@ -627,4 +628,26 @@ void Build_mpi_type(
   MPI_Type_create_struct(3, array_of_blocklengths, array_of_displacements, array_of_types, input_mpi_t_p);
   MPI_Type_commit(input_mpi_t_p);  
 } /* Build_mpi_type */
+
+void Get_input(int my_rank, int comm_sz, double* a_p, double* b_p, int* n_p) {
+  MPI_Datatype input_mpi_t;
+
+  Build_mpi_type(a_p, b_p, n_p, &input_mpi_t);
+
+  if (my_rank == 0) {
+    printf("Enter a, b, and n\n");
+    scanf("%lf %lf %d\n", a_p, b_p, n_p);
+  }
+  MPI_Bcast(a_p, 1, input_mpi_t, 0, MPI_COMM_WORLD);
+
+  MPI_Type_free(&input_mpi_t);
+} /* Get_input */
 ```
+
+## 프로그램 성능 평가
+
+### 수행 시간
+
+MPI_Wtime 함수를 제공하며 이 함수는 걸리는 시간을 초 단위로 리턴한다.
+
+MPI 컬렉티브 통신 함수 MPI_Barrier는 커뮤니케이터에서 모든 프로세스가 호출할 떄까지 어떤 프로세스도 리턴하지 않도록 보장해 준다.
