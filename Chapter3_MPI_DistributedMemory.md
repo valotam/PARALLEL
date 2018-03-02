@@ -586,6 +586,9 @@ void Mat_vect_mult(
 } /* Mat_vect_mult */
 ```
 
+# 정리
+
+![Summary](images/2018/03/summary.png)
 
 ## MPI 파생 데이터 타입
 
@@ -605,8 +608,6 @@ int MPI_Type_create_struct(
 ```
 
 인수 count는 datatype에 있는 항목의 수이다. 따라서 예제에서는 3이 된다.
-
-## Need to be added
 
 ```c
 void Build_mpi_type(
@@ -651,3 +652,17 @@ void Get_input(int my_rank, int comm_sz, double* a_p, double* b_p, int* n_p) {
 MPI_Wtime 함수를 제공하며 이 함수는 걸리는 시간을 초 단위로 리턴한다.
 
 MPI 컬렉티브 통신 함수 MPI_Barrier는 커뮤니케이터에서 모든 프로세스가 호출할 떄까지 어떤 프로세스도 리턴하지 않도록 보장해 준다.
+
+
+## 병렬 정렬 알고리즘
+
+프로세스 간에 분산된 키를 사용한다.
+
+n개의 키가 있고, p = comm_sz 프로세스를 갖고 있다면, 알고리즘은 각 프로세스에 할당된 n/p 키를 사용하게 된다.
+
+시작하게 되면 어떤 키를 어떤 프로세스에 할당할지에 대한 제한은 없다. 그러나 알고리즘이 종료할 때는,
+
+-   각 프로세스에 할당된 키가 오름차순으로 정렬되어야 하고,
+-   0 <= q < r < p 이면 프로세스 q에 할당된 각 키는 프로세스 r에 할당된 모든 키에 대해 작거나 같다.
+
+프로세스 랭크에 따라 키를 라인업하면 프로세스 0부터 키를 갖게 되고, 그 다음 순으로 된다.

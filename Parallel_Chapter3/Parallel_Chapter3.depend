@@ -3,3 +3,9 @@
 	<stdio.h>
 	<mpi.h>
 
+1519953784 source:/home/valotam/Source/PARALLEL/Parallel_Chapter3/trapezoidal_rule.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<mpi.h>
+

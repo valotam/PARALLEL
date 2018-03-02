@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <mpi.h>
 
 double Trap(
@@ -10,10 +12,10 @@ double Trap(
 double f(double endpt);
 
 int main(void) {
-  int my_rank, comm_sz, n = 1024, local_n;
+  int my_rank, comm_sz, n = 2048, local_n;
   double a= 0.0, b = 3.0, h, local_a, local_b;
   double local_int, total_int;
-  int source;
+  //int source;
 
   double ticktock = MPI_Wtime();
   MPI_Init(NULL, NULL);
@@ -71,5 +73,5 @@ double Trap(
 } /* Trap */
 
 double f(double endpt) {
-    return 7*endpt + 2;
+    return abs(3*sin(endpt)) + 5;
 } /* f */
