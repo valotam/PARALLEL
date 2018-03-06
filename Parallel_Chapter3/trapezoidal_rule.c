@@ -29,7 +29,7 @@ int main(void) {
   local_b = local_a + local_n * h;
   local_int = Trap(local_a, local_b, local_n, h);
 
-  /* reduction
+  /*reduction
   if (my_rank != 0) {
     MPI_Send(&local_int, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
   } else {
@@ -38,7 +38,7 @@ int main(void) {
       MPI_Recv(&local_int, 1, MPI_DOUBLE, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       total_int += local_int;
     }
-  } */
+  }*/
   MPI_Reduce(&local_int, &total_int, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
   if (my_rank == 0) {
