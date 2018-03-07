@@ -1,0 +1,11 @@
+/************************************************************************
+ * Write an MPI "hello World!" program using the appropriate MPI calls.
+ ************************************************************************/
+
+#include	"mpi.h"
+#include	<iostream>
+
+int main(int argc, char** argv)
+{
+
+}/* End Main */

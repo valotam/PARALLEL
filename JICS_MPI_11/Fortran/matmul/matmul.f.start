@@ -1,0 +1,12 @@
+      program matmul
+
+      include 'mpif.h'
+
+      parameter (NRA = 62)
+      parameter (NCA = 15)
+      parameter (NCB = 7)
+      parameter (MASTER = 0)
+      parameter (FROM_MASTER = 1)
+      parameter (FROM_WORKER = 2)
+
+      end

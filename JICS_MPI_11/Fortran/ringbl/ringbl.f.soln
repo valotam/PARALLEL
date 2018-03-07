@@ -1,0 +1,71 @@
+      PROGRAM ringnb
+
+      IMPLICIT NONE
+
+      include "mpif.h"
+
+      INTEGER ierror, val, my_rank, nprocs
+      INTEGER rightid, leftid
+      INTEGER tmp, sum
+      INTEGER wait_status(MPI_STATUS_SIZE)
+      INTEGER recv_request
+
+C     *----------------*
+C     * Initialize MPI *
+C     *----------------*
+
+      CALL MPI_INIT(ierror)
+
+C     *--------------------------------------------------------------------*
+C     * Find out my rank and size using global communicator MPI_COMM_WORLD *
+C     *--------------------------------------------------------------------*
+
+      CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_rank, ierror)
+      CALL MPI_COMM_SIZE(MPI_COMM_WORLD, nprocs, ierror)
+
+C     *--------------------*
+C     * Find out neighbors *
+C     *--------------------*
+
+      rightid = my_rank + 1
+      IF (rightid .EQ. nprocs) rightid = 0
+
+      leftid = my_rank - 1
+      IF (leftid .EQ. -1) leftid = nprocs-1
+
+C     *---------------------------------------------------------------------*
+C     * Send the process rank stored as val to the process on my right and  *
+C     * receive a process rank from the process on my left and store as tmp *
+C     *---------------------------------------------------------------------*
+
+      sum = 0
+      val = my_rank
+ 100  CONTINUE
+
+      CALL MPI_IRECV(tmp, 1, MPI_INTEGER, leftid, 99,
+     +     MPI_COMM_WORLD, recv_request, ierror)
+
+      CALL MPI_SSEND(val, 1, MPI_INTEGER, rightid, 99,
+     +     MPI_COMM_WORLD, ierror)
+
+      CALL MPI_WAIT(recv_request,wait_status)
+
+      sum = sum + tmp
+      val = tmp
+
+      IF(tmp .NE. my_rank) GOTO 100
+
+C     *--------------------------*/
+C     * Print the output message */
+C     *--------------------------*/
+
+      PRINT *, 'Proc ', my_rank, ' sum = ',sum
+
+C     *-----------------------*/
+C     * Exit and finalize MPI */
+C     *-----------------------*/
+
+      CALL MPI_FINALIZE(ierror)
+
+      STOP
+      END

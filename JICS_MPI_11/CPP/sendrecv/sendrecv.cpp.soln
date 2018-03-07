@@ -1,0 +1,48 @@
+#include "mpi.h"
+#include <iostream>
+#include <string>
+
+int main(int argc, char ** argv) 
+{
+  int rank, ntag = 100;
+  char message[14];
+  MPI::Status status;
+
+  /*----------------*/
+  /* Initialize MPI */
+  /*----------------*/
+
+  MPI::Init(argc, argv);
+
+  /*------------------------------------------------------*/
+  /* Get my rank in the MPI_COMM_WORLD communicator group */
+  /*------------------------------------------------------*/
+
+  rank = MPI::COMM_WORLD.Get_rank();
+
+  /*---------------------------------------*/
+  /* Process 0 sends a message to process 1*/
+  /*---------------------------------------*/
+
+  if (rank == 0) {
+    strcpy(message, "Hello,World!");
+    MPI::COMM_WORLD.Send(message, 14, MPI::CHAR, 1, ntag);
+  }
+
+  /*--------------------------------------------*/
+  /* Process 1 receives a message from process 0*/
+  /* and outputs the result                     */
+  /*--------------------------------------------*/
+
+  if (rank == 1 ) {
+    MPI::COMM_WORLD.Recv(message, 14, MPI::CHAR, 0, ntag, status);
+    cout << "Process " << rank <<" : " << message << endl;
+  }
+
+  /*--------------*/
+  /* Finalize MPI */
+  /*--------------*/
+
+  MPI::Finalize();
+
+}

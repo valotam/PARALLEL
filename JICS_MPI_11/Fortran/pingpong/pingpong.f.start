@@ -1,0 +1,7 @@
+      PROGRAM pingpong
+
+      IMPLICIT NONE
+
+      include "mpif.h"
+
+      END

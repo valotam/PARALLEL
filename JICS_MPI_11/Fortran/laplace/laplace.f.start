@@ -1,0 +1,27 @@
+      program laplace
+
+      implicit none
+
+      include    'mpif.h'
+
+      integer NPROC
+      integer NR                      ! Number of Rows
+      integer NC                      ! Number of Cols
+      integer NCL                     ! Number of Cols per PE
+      parameter (NPROC=4, NR=1000, NC=1000, NCL=NC/NPROC)
+
+      integer LEFT                    ! Tag for messages left
+      integer RIGHT                   ! Tag for messages right
+      integer ROOT                    ! The root PE
+      parameter (LEFT=100, RIGHT=101, ROOT=0)
+
+      real*8  t(0:NR+1,0:NCL+1), told(0:NR+1,0:NCL+1)
+      real*8  dt                      ! Delta T
+      real*8  dtg                     ! Delta T global
+
+      integer npes                    ! Number of PEs
+      integer mype                    ! My PE number
+      integer niter                   ! Iter counter
+      integer status(MPI_STATUS_SIZE) ! Error Status
+
+      END                     ! End of Program

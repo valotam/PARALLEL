@@ -1,0 +1,9 @@
+      program array 
+
+      include 'mpif.h'
+
+      integer   ARRAYSIZE, MASTER
+      parameter (ARRAYSIZE = 600000)
+      parameter (MASTER = 0)
+
+      end

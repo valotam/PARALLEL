@@ -1,0 +1,67 @@
+C ********************************************************************
+C Write an MPI "hello World!" program using the appropriate MPI calls.
+C ********************************************************************
+      PROGRAM hello
+
+      IMPLICIT NONE
+
+C **************************
+C 1.Include the header
+C **************************
+      include "mpif.h"
+
+      INTEGER ierror, rank, size, i, tag
+      CHARACTER*12 message, inmsg
+      INTEGER status(MPI_STATUS_SIZE)
+
+C ******************
+C 2. Initialize MPI 
+C ******************
+
+      CALL MPI_INIT(ierror)
+
+C ************************************************************
+C Find out my rank in the global communicator MPI_COMM_WORLD
+C ************************************************************
+
+      CALL XXXXXXXXXXXXX(MPI_COMM_WORLD, rank, ierror)
+
+C ************************************************************
+C Find out the size of the global communicator MPI_COMM_WORLD
+C ************************************************************
+
+      CALL MPI_COMM_SIZE(XXXXXXXXXXXXXX, size, ierror)
+
+C  **************************
+C  5.Check the rank, and 
+C  **************************
+
+      tag = 17
+      IF (rank .EQ. 0) THEN
+C    **************************
+C      a.if the process is the master, then send a "Hello,World!" 
+C        message, in characters, to each of the workers. 
+C    **************************
+
+        message = 'Hello World!'
+        DO i=1,size-1
+          CALL MPI_XXXX(message, 12, XXXXXXXXXXXXX, i, tag,
+     +                  MPI_COMM_WORLD, ierror)
+        ENDDO
+      ELSE
+C    **************************
+C      b.if the process is a worker, then receive the "Hello,World!"
+C        message and print it out.
+C    **************************
+        CALL MPI_XXXX(inmsg, XX, XXXXXXXXXXXXX, 0, tag,
+     +                MPI_COMM_WORLD, status, XXXXXX)
+        WRITE(*,*) 'Process ',rank, ': ',inmsg
+      ENDIF
+        
+C  **************************
+C  6.Finalize MPI 
+C  **************************
+      CALL MPI_XXXXXXXX(ierror)
+
+      STOP
+      END

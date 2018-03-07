@@ -1,0 +1,7 @@
+      PROGRAM ringnb
+
+      IMPLICIT NONE
+
+      include "mpif.h"
+
+      END

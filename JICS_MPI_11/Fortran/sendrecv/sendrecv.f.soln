@@ -1,0 +1,50 @@
+
+      program sendrecv
+      include 'mpif.h'
+
+      integer ntag
+      integer rank, ierror, status(MPI_STATUS_SIZE)
+      character(13) message
+
+      ntag = 100
+
+C     *----------------*
+C     * Initialize MPI *
+C     *----------------*
+
+      call MPI_INIT(ierror)
+
+C     *------------------------------------------------------*
+C     * Get my rank in the MPI_COMM_WORLD communicator group *
+C     *------------------------------------------------------*
+
+      call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
+
+C     *---------------------------------------*
+C     * Process 0 sends a message to process 1*
+C     *---------------------------------------*
+
+      if (rank .eq . 0) then
+        message = 'Hello, World!'
+        call MPI_Send(message, 13, MPI_CHARACTER, 1, ntag,
+     +    MPI_COMM_WORLD, ierror)
+      endif
+
+C     *--------------------------------------------*
+C     * Process 1 receives a message from process 0*
+C     * and outputs the result                     *
+C     *--------------------------------------------*
+
+      if (rank .eq . 1) then
+        call MPI_Recv(message, 13, MPI_CHARACTER, 0, ntag,
+     +    MPI_COMM_WORLD, status, ierror)
+      print *, 'Process',rank, ':', message
+      endif
+
+C     *--------------*
+C     * Finalize MPI *
+C     *--------------*
+
+      call MPI_FINALIZE(ierror)
+
+      end

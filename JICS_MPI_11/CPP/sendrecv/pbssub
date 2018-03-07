@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -A UT-NTNLEDU
+#PBS -N test
+#PBS -j oe
+#PBS -l walltime=00:01:00,size=12
+
+cd $PBS_O_WORKDIR
+date
+aprun -n 2 ./sendrecv

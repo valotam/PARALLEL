@@ -1,0 +1,203 @@
+      program laplace
+
+      implicit none
+
+      include    'XXXXXX'
+
+      integer NPROC
+      integer NR                      ! Number of Rows
+      integer NC                      ! Number of Cols
+      integer NCL                     ! Number of Cols per PE
+      parameter (NPROC=4, NR=1000, NC=1000, NCL=NC/NPROC)
+
+      integer LEFT                    ! Tag for messages left
+      integer RIGHT                   ! Tag for messages right
+      integer ROOT                    ! The root PE
+      parameter (LEFT=100, RIGHT=101, ROOT=0)
+
+      real*8  t(0:NR+1,0:NCL+1), told(0:NR+1,0:NCL+1)
+      real*8  dt                      ! Delta T
+      real*8  dtg                     ! Delta T global
+
+      integer npes                    ! Number of PEs
+      integer mype                    ! My PE number
+      integer niter                   ! Iter counter
+      integer status(MPI_STATUS_SIZE) ! Error Status
+
+      integer i, j, iter, ierr
+
+C       *-----------------*
+C      *  Initialize MPI *
+C     *-----------------*
+
+      call XXXXXXXX(XXXX)
+
+C       *----------------------------------------*
+C      *  Determine size of global communicator *
+C     *----------------------------------------*
+
+      call XXXXXXXXXXXXX(MPI_COMM_WORLD, XXXX, ierr)
+
+C       *-----------------------------------------------*
+C      *  Determine my rank in the global communicator *
+C     *-----------------------------------------------*
+
+      call XXXXXXXXXXXXX(XXXXXXXXXXXXXX, mype, ierr)
+
+      call initialize( t )          ! Give initial guesss of 0.
+
+      call set_bcs( t, mype, npes ) ! Set the Boundary values
+
+      do i=0, NR+1                  ! Copy the values into told
+         do j=0, NCL+1
+            told(i,j) = t(i,j)
+         enddo
+      enddo
+
+C       *-------------------------------------------------*
+C      * Do Computation on Sub-grid for Niter iterations *
+C     *-------------------------------------------------*
+
+      niter=1000
+      
+      Do 100 iter=1,niter
+         
+         Do j=1,NCL
+            Do i=1,NR
+               T(i,j) = 0.25 * ( Told(i+1,j)+Told(i-1,j)+
+     +                           Told(i,j+1)+Told(i,j-1) )
+            Enddo
+         Enddo
+
+         dt = 0
+
+         Do j=1,NCL                 ! Copy for next iteration
+            Do i=1,NR
+               dt        = max( abs(t(i,j) - told(i,j)), dt )
+               Told(i,j) = T(i,j)
+            Enddo
+         Enddo
+
+         if (mype .lt. npes-1)
+
+C       *------------------------------------------------------------------*
+C      * Send my data to the processor on the right; Only npes-1 do this *
+C     *------------------------------------------------------------------*
+
+     &      call XXXXXXXX(T(1,NCL), NR, XXXXXXXX, mype+1, XXXXX,
+     &                                   MPI_COMM_WORLD, ierr)
+
+         if (mype .ne. 0)
+
+C       *--------------------------------------------------------------------*
+C      * Sending my data to the processor on the left ; Only npes-1 do this *
+C     *--------------------------------------------------------------------*
+
+     &      call XXXXXXXX(T(1,1  ), XX, MPI_REAL, XXXXXX, LEFT,
+     &                                   XXXXXXXXXXXXXX, ierr)
+
+         if (mype .ne. 0)
+
+C       *---------------------------------------------------*
+C      *  Receive new data from LEFT processor of any source *
+C     *---------------------------------------------------*
+
+     &      call XXXXXXXX(T(1,0),     NR, MPI_REAL, XXXXXXXXXXXXXX,
+     &                             RIGHT, MPI_COMM_WORLD, XXXXXX, ierr)
+
+         if (mype .ne. npes-1)
+
+C       *------------------------------------------------------*
+C      *  Receive new data from RIGHT processsor of any source *
+C     *------------------------------------------------------*
+
+     &      call XXXXXXXX(T(1,NCL+1), XX, XXXXXXXX, MPI_ANY_SOURCE,
+     &                              XXXX, XXXXXXXXXXXXXX, status, ierr)
+
+C       *---------------------------------------------------------------------*
+C      *  Detemermine max value from all processor calculations using reduce *
+C     *---------------------------------------------------------------------*
+
+         call XXXXXXXXXX(dt, dtg, X, MPI_REAL, XXXXXXX, ROOT,
+     &                                    XXXXXXXXXXXXXX, ierr)
+
+C       *------------------------*
+C      * Print some test values *
+C     *------------------------*
+
+         If( mod(iter,100).eq.0 ) then
+            if( mype.eq.0 ) then
+               write(*,1) iter, mype, T(10,10)
+ 1             format('Iter = ',i5,' PE = ',I4,' T(10,10)    = ',f20.8)
+            endif
+         endif
+
+C       *---------------------------------------------------------------*
+C      * All processors in the global communicator wait at the barrier *
+C     *---------------------------------------------------------------*
+
+      call XXXXXXXXXXX( XXXXXXXXXXXXXX, ierr )
+
+ 100  CONTINUE                !  End of iteration
+
+      call XXXXXXXXXXXX(ierr) ! Finalize MPI
+
+      END                     ! End of Program
+
+C       *-----------------------------------------------------*
+C      * Initialize all the values to 0. as a starting value *
+C     *-----------------------------------------------------*
+
+      subroutine initialize( t )
+      implicit none
+
+      integer    NPROC,   NR,      NC,      NCL,          MXITER
+      parameter (NPROC=4, NR=1000, NC=1000, NCL=NC/NPROC, MXITER=1000)
+
+      real*8     t(0:NR+1,0:NCL+1), told(0:NR+1,0:NCL+1)
+      integer    i, j
+
+      do i=0, NR+1
+         do j=0, NCL+1
+            t(i,j) = 0
+         enddo
+      enddo
+      
+      return
+
+      end
+
+C        *----------------------------------------------------------------*
+C       * Set the values at the boundary.  Values at the boundary do not *
+C      * Change through out the execution of the program                *
+C     *----------------------------------------------------------------*
+
+      subroutine set_bcs( t, mype, npes )
+      implicit none
+
+      integer    NPROC,   NR,      NC,      NCL,          MXITER
+      parameter (NPROC=4, NR=1000, NC=1000, NCL=NC/NPROC, MXITER=1000)
+
+      real*8     t(0:NR+1,0:NCL+1), told(0:NR+1,0:NCL+1)
+      integer    i, j, mype, npes
+
+      if( mype.eq.0 ) then
+         do i=0,NR+1              ! Left boundary
+            T(i,0    ) = 100.0
+         enddo
+      endif
+
+      if( mype.eq.npes-1 ) then
+         do i=0,NR+1              ! Right boundary
+            T(i,NCL+1) = 100.0
+         enddo
+      endif
+
+      do j=0,NCL+1                ! Set Top and Bottom Boundaries
+         T(0   ,j) = 100.0
+         T(NR+1,j) = 100.0
+      enddo
+
+      return
+
+      end
