@@ -38,7 +38,7 @@ void main(int argc, char *argv[])
   val = myrank;
   sum = 0;
   do {
-    MPI_Irecv(&tmp,1, MPI_INT, leftid, 99, MPI_COMM_WORLD, &recv_request);
+    MPI_Recv(&tmp,1, MPI_INT, leftid, 99, MPI_COMM_WORLD, &recv_request);
     MPI_Ssend(&val,1,MPI_INT,rightid,99, MPI_COMM_WORLD);
     MPI_Wait(&recv_request,&wait_status);
     val = tmp;

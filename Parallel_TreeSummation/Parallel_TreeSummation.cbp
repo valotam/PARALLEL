@@ -2,21 +2,24 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Parallel_PingPong" />
+		<Option title="Parallel_TreeSummation" />
 		<Option pch_mode="2" />
 		<Option compiler="gnu_gcc_compiler_mpi" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/Parallel_PingPong" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug/Parallel_TreeSummation" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_mpi" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add directory="/usr/mpi" />
+				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Release/Parallel_PingPong" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release/Parallel_TreeSummation" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_mpi" />
@@ -31,20 +34,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Linker>
-			<Add directory="/usr/mpi/lib" />
-		</Linker>
-		<Unit filename="pingpong.c">
-			<Option compilerVar="CC" />
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
-		<Unit filename="ring_block.c">
-			<Option compilerVar="CC" />
-			<Option compile="0" />
-			<Option link="0" />
-		</Unit>
-		<Unit filename="ring_nonblock.c">
+		<Unit filename="treeSum.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>

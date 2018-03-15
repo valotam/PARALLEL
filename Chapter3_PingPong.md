@@ -60,7 +60,9 @@ for (length = 1; length <=  10001; length += 1000){
 ## Point-to-point Communication
 
 반드시 두 개의 프로세스만 참여하는 통신
+
 통신은 커뮤니케이터 내에서만 이루어 진다.
+
 송신/수신 프로세스의 확인을 위해 커뮤니케이터와 랭크 사용
 
 **통신의 완료**
@@ -70,6 +72,13 @@ for (length = 1; length <=  10001; length += 1000){
 -   송신: 송신 변수는 통신이 완료되면 다시 사용될 수 있음
 -   수신: 수신 변수는 통신이 완료된 후부터 사용될 수 있음
 
+![Synchronous_Communication](images/2018/03/synchronous-communication.png)
+
+![Ready_Communication](images/2018/03/ready-communication.png)
+
+![Buffer_Communication](images/2018/03/buffer-communication.png)
+
+![Standard_Communication](images/2018/03/standard-communication.png)
 
 ## Blocking/non-blocking communication
 
@@ -85,23 +94,7 @@ for (length = 1; length <=  10001; length += 1000){
 표준 송신  | MPI_Send  | MPI_Isend
 수신  | MPI_Recv  | MPI_Irecv  
 
-
-![Synchronous_Communication](images/2018/03/synchronous-communication.png)
-
-![Ready_Communication](images/2018/03/ready-communication.png)
-
-![Buffer_Communication](images/2018/03/buffer-communication.png)
-
-![Standard_Communication](images/2018/03/standard-communication.png)
-
-
 > Ring (Non-blocking Communication)
-
-This exercise requires programming
-
-This program allows a processor to communicate its rank around a ring. The sum of all ranks is then accumulated and printed out by each processor.
-
-Consider a set of processes arranged in a ring as shown below. Use a token passing method to compute the sum of the ranks of the processes.
 
 ```c
    1
@@ -111,16 +104,11 @@ Consider a set of processes arranged in a ring as shown below. Use a token passi
    3
 ```
 
-Figure 1: Four processes arranged in a ring. Messages are sent from 0 to 1 to 2 to 3 to 0 again, sum of ranks is 6.
+Figure 1: 네 개의 프로세서가 링 형태로 할당되어 있다. 메시지들은 프로세스 0에서 1, 1에서 2, 2에서 3, 다시 3에서 0으로 전송되고, 합 연산의 값은 최종 6으로 도출된다.
 
-Each processor stores its rank in MPI_COMM_WORLD as an integer and sends this value to the processor on its right. It then receives an integer from its left neighbor. It keeps track of the sum of all the integers received. The processors continue passing on the values they receive until they get their own rank back. Each process should finish by printing out the sum of the values.
+각각의 프로세서는 자신의 랭크를 val 으로 가지고 있고, 이것을 sum에 합산한다. 메시지를 서로 주고 받으면서 랭크 값(혹은 val)을 넘기는 것을 확인할 수 있다.
 
-For this program use synchronous non-blocking send **MPI_Issend()**. *Make sure that you do not overwrite information.*
-
-You are asked to use synchronous message passing because the standard send can be either buffered or synchronous, and you should learn to program for either possibility.
-
-Running this program using 16 processes should have an output similar to the following
-
+동기화 논블로킹 송신 방식인 **MPI_Issend()** 를 사용하고, *정보가 덮어쓰기 되지 않도록 주의한다.*
 
 ![result_ring_nonblock](images/2018/03/result-ring-nonblock.png)
 
