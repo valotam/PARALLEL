@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-#define SIZE 32
+#define SIZE 8
 
 int main(void){
     int comm_sz, my_rank, i, stride, batch_size;
