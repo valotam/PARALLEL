@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1522581239 source:/home/valotam/Source/PARALLEL/Parallel_MutexCondition/mutex_condition.c
+	<stdio.h>
+	<pthread.h>
+
+1522581618 source:/home/valotam/Source/PARALLEL/Parallel_MutexCondition/busywating_deadlock.c
+	<stdio.h>
+	<pthread.h>
+
