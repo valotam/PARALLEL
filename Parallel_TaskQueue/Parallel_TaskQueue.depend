@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1522577436 source:/home/valotam/Source/PARALLEL/Parallel_TaskQueue/task_queue.c
+	<stdio.h>
+	<stdlib.h>
+	<pthread.h>
+	"queue.h"
+
+1522551789 /home/valotam/Source/PARALLEL/Parallel_TaskQueue/queue.h
+
