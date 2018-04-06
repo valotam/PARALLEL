@@ -56,6 +56,30 @@ int main(void) {
     submit_work(7, 8, 3);
     /* 30 / 6 = 5 */
     submit_work(30, 6, 4);
+        /* 3 x 3 = 9 */
+    submit_work(3, 3, 1);
+    /* 4 - 3 = 1 */
+    submit_work(4, 3, 2);
+    /* 7 * 8 = 56 */
+    submit_work(7, 8, 3);
+    /* 30 / 6 = 5 */
+    submit_work(30, 6, 4);
+        /* 3 x 3 = 9 */
+    submit_work(3, 3, 1);
+    /* 4 - 3 = 1 */
+    submit_work(4, 3, 2);
+    /* 7 * 8 = 56 */
+    submit_work(7, 8, 3);
+    /* 30 / 6 = 5 */
+    submit_work(30, 6, 4);
+        /* 3 x 3 = 9 */
+    submit_work(3, 3, 1);
+    /* 4 - 3 = 1 */
+    submit_work(4, 3, 2);
+    /* 7 * 8 = 56 */
+    submit_work(7, 8, 3);
+    /* 30 / 6 = 5 */
+    submit_work(30, 6, 4);
 
     /* start all threads */
     for (int i = 0; i < THREADS; i++)
