@@ -1,7 +1,8 @@
 # depslib dependency file v1.0
-1523185072 source:/home/valotam/Source/PARALLEL/Parallel_OpenMP/parallel_for.cpp
-	<stdio.h>
-	<stdlib.h>
-	<math.h>
+1523186419 source:/home/valotam/Source/PARALLEL/Parallel_OpenMP/parallel_for.cpp
+	<iostream>
+	<sstream>
+	<cstdlib>
+	<cmath>
 	<omp.h>
 
